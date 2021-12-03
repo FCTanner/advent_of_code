@@ -36,8 +36,6 @@ for(i in 1:nrow(instructions)){
   else if(instructions$direction[i] == "forward"){
     forward_pos <- forward_pos + instructions$units[i]
     depth_pos <- depth_pos + (aim * instructions$units[i])
-  }else{
-    
   }
 }
 
