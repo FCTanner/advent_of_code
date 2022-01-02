@@ -64,8 +64,6 @@ sum_unmarked * winning_number
 
 # Part 2 ------------------------------------------------------------------
 
-# Not working :(
-
 # Add all winning boards to list, choose last one
 
 winning_boards <- list()
