@@ -1,4 +1,4 @@
-dat <- read.delim("2024/input", sep = " ", header = FALSE) |> 
+dat <- read.delim("2024/2024-01/input", sep = " ", header = FALSE) |> 
   as.data.frame() |>
   dplyr::select(V1, V4)
 
