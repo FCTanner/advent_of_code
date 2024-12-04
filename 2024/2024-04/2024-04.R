@@ -113,7 +113,7 @@ top_right_to_bottom_left <- input |>
   count_xmas() 
 
 
-left_to_right +
+p1_solution <- left_to_right +
   right_to_left +
   top_to_bottom +
   bottom_to_top +
@@ -122,6 +122,93 @@ left_to_right +
   bottom_left_to_top_right +
   top_right_to_bottom_left
 
+p1_solution
+
+
+
+
+# Part 2 ------------------------------------------------------------------
+
+
+knock_all_but_mas <- function(letter) {
+  allowed <- c("M", "A", "S")
+  if (!letter %in% allowed) return("+") # "+" instead of NA to build prettier matching patterns
+  return(letter)
+}
+
+
+
+char_vec_to_matrix <- function(char_vec) {
+  
+  dim <- nchar(char_vec)
+  
+  knocked <- char_vec |> 
+    purrr::map(\(x) {
+      strsplit(x, "") |> 
+        unlist() |> 
+        purrr::map_chr(knock_all_but_mas)
+      }) |>
+   unlist() 
+  
+  matrix(knocked, nrow = dim, ncol = dim, byrow = TRUE)
+}
+
+
+
+is_match <- function(mat) {
+
+  if (mat[2,2] != "A") {
+    return(FALSE)
+  }
+  
+  # matatch 1
+  if (mat[1,1] == "M" && mat[1,3] == "M" && mat[3,1] == "S" && mat[3,3] == "S") {
+    return(TRUE)
+  }
+  
+  # Match 2
+  if (mat[1,1] == "S" && mat[1,3] == "M" && mat[3,1] == "S" && mat[3,3] == "M") {
+    return(TRUE)
+  }
+  
+  # Match 3
+  if (mat[1,1] == "M" && mat[1,3] == "S" && mat[3,1] == "M" && mat[3,3] == "S") {
+    return(TRUE)
+  }
+  
+  # Match 4
+  if (mat[1,1] == "S" && mat[1,3] == "S" && mat[3,1] == "M" && mat[3,3] == "M") {
+    return(TRUE)
+  }
+  
+  return(FALSE)
+}
+
+
+
+get_submatrices <- function(mat, window_size) {
+  n_rows <- nrow(mat)
+  n_cols <- ncol(mat)
+  submatrices <- list()
+  
+  index <- 1
+  for (i in 1:(n_rows - window_size + 1)) {
+    for (j in 1:(n_cols - window_size + 1)) {
+      submatrices[[index]] <- mat[i:(i + window_size - 1), j:(j + window_size - 1)]
+      index <- index + 1
+    }
+  }
+  return(submatrices)
+}
+
+
+p2_solution <- input |> 
+  char_vec_to_matrix() |> 
+  get_submatrices(3) |> 
+  purrr::map_lgl(is_match) |> 
+  sum()
+
+p2_solution
 
 
 # Tests -------------------------------------------------------------------
@@ -198,5 +285,98 @@ testthat::test_that("Diagonalize works", {
 })
 
 
+testthat::test_that("Detection works", {
+  
+  match1 <- c(
+    "M+M",
+    "+A+",
+    "S+S"
+  )
+  
+  match2 <- c(
+    "S+M",
+    "+A+",
+    "S+M"
+  )
+  
+  match3 <- c(
+    "M+S",
+    "+A+",
+    "M+S"
+  )
+  
+  match4 <- c(
+    "S+S",
+    "+A+",
+    "M+M"
+  )
+  
+  match1 |> 
+    char_vec_to_matrix() |> 
+    is_match() |> 
+    testthat::expect_true()
+  
+  match2 |> 
+    char_vec_to_matrix() |> 
+    is_match() |> 
+    testthat::expect_true()
+  
+  match3 |> 
+    char_vec_to_matrix() |> 
+    is_match() |> 
+    testthat::expect_true()
+  
+  match4 |> 
+    char_vec_to_matrix() |> 
+    is_match() |> 
+    testthat::expect_true()
+})
 
 
+
+testthat::test_that("Other stuff is not detected", {
+  
+  match1 <- c(
+    "++M",
+    "+A+",
+    "S+S"
+  )
+  
+  match2 <- c(
+    "S+M",
+    "+1+",
+    "S+M"
+  )
+  
+  match3 <- c(
+    "M+S",
+    "+A+",
+    "A+S"
+  )
+  
+  match4 <- c(
+    "S+S",
+    "+A-",
+    "M+l"
+  )
+  
+  match1 |> 
+    char_vec_to_matrix() |> 
+    is_match() |> 
+    testthat::expect_false()
+  
+  match2 |> 
+    char_vec_to_matrix() |> 
+    is_match() |> 
+    testthat::expect_false()
+  
+  match3 |> 
+    char_vec_to_matrix() |> 
+    is_match() |> 
+    testthat::expect_false()
+  
+  match4 |> 
+    char_vec_to_matrix() |> 
+    is_match() |> 
+    testthat::expect_false()
+})
